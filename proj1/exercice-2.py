@@ -63,19 +63,6 @@ for filename in os.listdir(path):
     etd_keys = etdread.split("\n",-1)[:-1]
     keysfordoc[filename] = etd_keys
 
-"""
-####################
-candidatesfordocs = dict()
-for i in docindexnames:
-    candidatesfordocs[docindexnames[i]] = dict()
-for i in docindexnames:
-    docname = docindexnames[i]
-    print "doc "+str(i)+" "+docname
-    for iword in range(len(vectorizer2.get_feature_names())):
-        wordindoctfidf = docstfidf.getrow(i).toarray()[0][iword]
-        if wordindoctfidf != 0:
-            candidatesfordocs[docname][vectorizer2.get_feature_names()[iword]] = wordindoctfidf
-"""
 
 doccandidateslist = dict()
 featurenames = list(vectorizer2.get_feature_names())
@@ -91,49 +78,18 @@ for idoc in range(len(docindexnames)):
     print docname
     print candidatewordsfordoc
     
-    
-    
-#sorted1 = sort(docstfidf.getrow(0).toarray()[0])[-5:]
-#sorted1 = sorted1[::-1]
 
-
-
-#print v
-#print vectorizer2.idf_
-"""
-candidates = list()
-
-globalwords = {}
-DFdict = {}
-
-def processDoc(docwords, name):
-    f1counts = {}
-    for word in docwords:
-        if word in f1counts.keys():
-            f1counts[word]+=1
-        else:
-            f1counts[word] = 1
-    
-    for word in f1counts.keys():
-        if word in globalwords.keys():
-            globalwords[word][name] = f1counts[word]
-        else:
-            globalwords[word] = {}
-            globalwords[word][name] = f1counts[word]
-    return
-
-
-
-processDoc(candidates, "Alice")
-vec3vocab = vectorizer2.vocabulary_
-idfdict = {}
-for term in candidates:
-    try:
-        idfdict[term] = vectorizer2.idf_[vec3vocab[term]] * globalwords[term]['Alice']
-    except Exception:
-        pass
-
-sorted_x = sorted(idfdict.items(), key=operator.itemgetter(1))
-for i in range(5):
-    print sorted_x[i]
-"""
+measuresdoc = dict()
+for idoc in range(len(docindexnames)):
+    docname = docindexnames[idoc]
+    setrelevant = set(keysfordoc[docname])
+    setanswer = set(doccandidateslist[docname])
+    sizeRel = len(setrelevant)
+    sizeAns = len(setanswer)
+    sizeInt = len(setrelevant.intersection(setanswer))
+    pr = sizeInt/(0.0+sizeAns)
+    re = sizeInt/(0.0+sizeRel)
+    f1 = (2*re*pr)/(re+pr)
+    measuredoc[docname]["pr"]=pr
+    measuredoc[docname]["re"]=re
+    measuredoc[docname]["f1"]=f1
