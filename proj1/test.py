@@ -8,22 +8,21 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import operator
 
 import os
-path = "C:\PRI2016\proj1/testes/"
+path = "fao30/documents/"
 
 all_docs = []
 for filename in os.listdir(path):
+    print filename
     etd = open(path + filename)
     etdread = etd.read()
-    etdread = etdread.decode('utf-8')
-    #print '++++++++++++++++++++\n'
+    etdread = etdread.decode('latin-1')
     etd_words = nltk.word_tokenize(etdread)
-    #print etd_words
-    all_docs += etd_words
-   # print '++++++++++++++++++++\n'
- #   print 'shit'
+    all_docs += [etdread]
 
+stop = set(stopwords.words('english'))
 
-vectorizer2 = TfidfVectorizer( use_idf=False )
-vectorizer2.fit_transform(all_docs)
+vectorizer2 = TfidfVectorizer( use_idf=True, ngram_range=(1,2), stop_words=stop )
+v = vectorizer2.fit_transform(all_docs)
 vec3vocab = vectorizer2.vocabulary_
-print vec3vocab
+print v
+print vectorizer2.idf_

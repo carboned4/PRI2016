@@ -8,37 +8,51 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import operator
 
 import os
-path = "C:\PRI2016\proj1\documents/"
+path = "fao30/documents/"
 
 all_docs = []
+docindexnames = dict()
+docindex = 0
 for filename in os.listdir(path):
+    docindexnames[docindex] = filename
     etd = open(path + filename)
     etdread = etd.read()
-    etdread = etdread.decode('utf-8')
-    #print '++++++++++++++++++++\n'
+    etdread = etdread.decode('latin-1')
     etd_words = nltk.word_tokenize(etdread)
-    #print etd_words
-    all_docs += etd_words
-   # print '++++++++++++++++++++\n'
- #   print 'shit'
-
-
-vectorizer2 = TfidfVectorizer( use_idf=True, ngram_range=(1,2) )
-vectorizer2.fit_transform(all_docs)
-vec3vocab = vectorizer2.vocabulary_
-
+    all_docs += [etdread]
+    docindex += 1
 
 stop = set(stopwords.words('english'))
 
+vectorizer2 = TfidfVectorizer( use_idf=True, ngram_range=(1,2), stop_words=stop )
+docstfidf = vectorizer2.fit_transform(all_docs)
+vecvocab = vectorizer2.vocabulary_
+
+####################
+
+path = "fao30/indexers/iic1/"
+
+keysfordoc = dict()
+for filename in os.listdir(path):
+    etd = open(path + filename)
+    etdread = etd.read()
+    etdread = etdread.decode('latin-1')
+    etd_keys = etdread.split("\n",-1)[:-1]
+    keysfordoc[filename] = etd_keys
 
 
+####################
+"""
 
-punct = string.punctuation
-punct = punct.translate(None,"'")
-exclude = set(punct)
+"""
 
-def test_set(s):
-    return ''.join(ch for ch in s if ch not in exclude)
+
+for docname in docindexnames.keys():
+    
+
+
+#print v
+#print vectorizer2.idf_
 
 candidates = list()
 
@@ -61,32 +75,8 @@ def processDoc(docwords, name):
             globalwords[word][name] = f1counts[word]
     return
 
-#exercise 1 - part 1 - reading words
-#english textual document
 
-etd = open('englishtextualdoc.txt')
-etdread = etd.read()
-etdread = etdread.decode('utf-8')
-etdsentences = nltk.sent_tokenize(etdread)
-etdwords = list()
-for etdsentence in etdsentences:
-    sentencenopunct = test_set(etdsentence.lower())
-    sentencewords = nltk.word_tokenize(sentencenopunct)
-    for i in range(len(sentencewords)):
-        word = sentencewords[i]
-        if word[0] == "'":
-            word = word[1:]
-        sentencewords[i] = word
-    sentenceclean = [i for i in sentencewords if i not in stop]
-    etdwords += sentenceclean
-etdbigrams = list(nltk.bigrams(etdwords))
-#print etdbigrams
-
-candidates += etdwords
-for bi in etdbigrams:
-    candidates += [bi[0]+" "+bi[1]]
-#print str(len(etdwords)) + " words + " + str(len(etdbigrams)) + " bigrams = " + str(len(candidates))
-
+"""
 processDoc(candidates, "Alice")
 vec3vocab = vectorizer2.vocabulary_
 idfdict = {}
@@ -99,3 +89,4 @@ for term in candidates:
 sorted_x = sorted(idfdict.items(), key=operator.itemgetter(1))
 for i in range(5):
     print sorted_x[i]
+"""
