@@ -6,6 +6,29 @@ from nltk.collocations import *
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import TfidfVectorizer
 import operator
+import numpy
+
+    
+def sort(array):
+    less = []
+    equal = []
+    greater = []
+
+    if len(array) > 1:
+        pivot = array[0]
+        for x in array:
+            if x < pivot:
+                less.append(x)
+            if x == pivot:
+                equal.append(x)
+            if x > pivot:
+                greater.append(x)
+        # Don't forget to return something!
+        return sort(less)+equal+sort(greater)  # Just use the + operator to join lists
+    # Note that you want equal ^^^^^ not pivot
+    else:  # You need to hande the part at the end of the recursion - when you only have one element in your array, just return the array.
+        return array
+
 
 import os
 path = "fao30/documents/"
@@ -40,20 +63,44 @@ for filename in os.listdir(path):
     etd_keys = etdread.split("\n",-1)[:-1]
     keysfordoc[filename] = etd_keys
 
-
+"""
 ####################
+candidatesfordocs = dict()
+for i in docindexnames:
+    candidatesfordocs[docindexnames[i]] = dict()
+for i in docindexnames:
+    docname = docindexnames[i]
+    print "doc "+str(i)+" "+docname
+    for iword in range(len(vectorizer2.get_feature_names())):
+        wordindoctfidf = docstfidf.getrow(i).toarray()[0][iword]
+        if wordindoctfidf != 0:
+            candidatesfordocs[docname][vectorizer2.get_feature_names()[iword]] = wordindoctfidf
 """
 
-"""
-
-
-for docname in docindexnames.keys():
+doccandidateslist = dict()
+featurenames = list(vectorizer2.get_feature_names())
+for idoc in range(len(docindexnames)):
+    docname = docindexnames[idoc]
+    featurenamescopy = numpy.array(featurenames)
+    tfidfdoccopy = numpy.array(docstfidf.getrow(idoc).toarray()[0])
+    sortedindices = (tfidfdoccopy.argsort()[-5:])[::-1]
+    candidatewordsfordoc = list()
+    for candidatei in sortedindices:
+        candidatewordsfordoc += [featurenamescopy[candidatei]]
+    doccandidateslist[docname] = candidatewordsfordoc
+    print docname
+    print candidatewordsfordoc
     
+    
+    
+#sorted1 = sort(docstfidf.getrow(0).toarray()[0])[-5:]
+#sorted1 = sorted1[::-1]
+
 
 
 #print v
 #print vectorizer2.idf_
-
+"""
 candidates = list()
 
 globalwords = {}
@@ -76,7 +123,7 @@ def processDoc(docwords, name):
     return
 
 
-"""
+
 processDoc(candidates, "Alice")
 vec3vocab = vectorizer2.vocabulary_
 idfdict = {}
