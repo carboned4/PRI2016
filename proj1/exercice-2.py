@@ -5,6 +5,9 @@ from nltk.corpus import stopwords
 from nltk.collocations import *
 from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import TfidfVectorizer
+
+from sklearn.metrics import f1_score
+
 import operator
 import numpy
 
@@ -61,6 +64,7 @@ for filename in os.listdir(path):
     etdread = etd.read()
     etdread = etdread.decode('latin-1')
     etd_keys = etdread.split("\n",-1)[:-1]
+    filename = filename[:-4] + '.txt'
     keysfordoc[filename] = etd_keys
 
 
@@ -75,11 +79,14 @@ for idoc in range(len(docindexnames)):
     for candidatei in sortedindices:
         candidatewordsfordoc += [featurenamescopy[candidatei]]
     doccandidateslist[docname] = candidatewordsfordoc
-    print docname
-    print candidatewordsfordoc
+    #print docname
+    #print candidatewordsfordoc
+    
+
     
 
 measuresdoc = dict()
+measures= dict()
 for idoc in range(len(docindexnames)):
     docname = docindexnames[idoc]
     setrelevant = set(keysfordoc[docname])
@@ -89,7 +96,12 @@ for idoc in range(len(docindexnames)):
     sizeInt = len(setrelevant.intersection(setanswer))
     pr = sizeInt/(0.0+sizeAns)
     re = sizeInt/(0.0+sizeRel)
-    f1 = (2*re*pr)/(re+pr)
-    measuredoc[docname]["pr"]=pr
-    measuredoc[docname]["re"]=re
-    measuredoc[docname]["f1"]=f1
+    try:
+        f1 = (2*re*pr)/(re+pr)
+    except ZeroDivisionError:
+        f1 = 0
+
+    measures["pr"] = pr
+    measures["re"] = re
+    measures["f1"] = f1
+    measuresdoc[docname] = measures
