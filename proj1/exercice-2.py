@@ -105,3 +105,35 @@ for idoc in range(len(docindexnames)):
     measures["re"] = re
     measures["f1"] = f1
     measuresdoc[docname] = measures
+
+ap = 0
+apdict = dict()
+for idoc in range(len(docindexnames)):
+    docname = docindexnames[idoc]
+    setrelevant = set(keysfordoc[docname])
+    setanswer = set(doccandidateslist[docname])
+    sizeRel = len(setrelevant)
+    sizeAns = len(setanswer)
+    sizeInt = len(setrelevant.intersection(setanswer))
+    pr = sizeInt/(0.0+sizeAns)
+    re = sizeInt/(0.0+sizeRel)
+    listansweri = []
+    setansweri = set()
+    for term in range(len(doccandidateslist[docname])):
+        listansweri += doccandidateslist[docname][term]
+        setanseri = set(listansweri)
+        p = (len(setansweri.intersection(setrelevant)))/(len(listansweri)+0.0)
+        r = int()
+        if doccandidateslist[docname][term] == keysfordoc[docname][term]:
+            r = 1
+        else:
+            print docname
+            r = 0
+        ap += (p * r) / (sizeRel+0.0)
+    apdict[docname] = ap
+    ap = 0
+    listanswer = []
+    setansweri = set()
+
+        
+        
