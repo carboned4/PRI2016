@@ -86,8 +86,8 @@ for idoc in range(len(docindexnames)):
     
 
 measuresdoc = dict()
-measures= dict()
 for idoc in range(len(docindexnames)):
+    measures= dict()
     docname = docindexnames[idoc]
     setrelevant = set(keysfordoc[docname])
     setanswer = set(doccandidateslist[docname])
