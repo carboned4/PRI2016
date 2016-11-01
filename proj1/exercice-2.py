@@ -119,15 +119,17 @@ for idoc in range(len(docindexnames)):
     re = sizeInt/(0.0+sizeRel)
     listansweri = []
     setansweri = set()
+    print docname
     for term in range(len(doccandidateslist[docname])):
-        listansweri += doccandidateslist[docname][term]
+        listansweri += [doccandidateslist[docname][term]]
         setanseri = set(listansweri)
-        p = (len(setansweri.intersection(setrelevant)))/(len(listansweri)+0.0)
+        print str(len(setanseri))        
+        p = (len(setanseri.intersection(setrelevant)))/(len(setanseri)+0.0)
         r = int()
-        if doccandidateslist[docname][term] == keysfordoc[docname][term]:
+        if doccandidateslist[docname][term] in keysfordoc[docname]:
             r = 1
         else:
-            print docname
+            #print docname
             r = 0
         ap += (p * r) / (sizeRel+0.0)
     apdict[docname] = ap
