@@ -108,6 +108,7 @@ for idoc in range(len(docindexnames)):
 
 ap = 0
 apdict = dict()
+mapdict = dict()
 for idoc in range(len(docindexnames)):
     docname = docindexnames[idoc]
     setrelevant = set(keysfordoc[docname])
@@ -120,6 +121,8 @@ for idoc in range(len(docindexnames)):
     listansweri = []
     setansweri = set()
     print docname
+    ap=dict()
+    apsum = 0
     for term in range(len(doccandidateslist[docname])):
         listansweri += [doccandidateslist[docname][term]]
         setanseri = set(listansweri)
@@ -131,8 +134,10 @@ for idoc in range(len(docindexnames)):
         else:
             #print docname
             r = 0
-        ap += (p * r) / (sizeRel+0.0)
+        ap[term+1] = (p * r) / (sizeRel+0.0)
+        apsum +=  (p * r) / (sizeRel+0.0)
     apdict[docname] = ap
+    mapdict[docname] = apsum/(0.0+len(doccandidateslist[docname]))
     ap = 0
     listanswer = []
     setansweri = set()
