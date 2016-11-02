@@ -7,40 +7,13 @@ from sklearn.datasets import fetch_20newsgroups
 from sklearn.feature_extraction.text import TfidfVectorizer
 import operator
 
-
-train = fetch_20newsgroups(subset='train')
-test = fetch_20newsgroups(subset='test')
-vectorizer2 = TfidfVectorizer( use_idf=True, ngram_range=(1,2) )
-trainvec2 = vectorizer2.fit_transform(train.data)
-stop = set(stopwords.words('english'))
-
 punct = string.punctuation
 punct = punct.translate(None,"'")
 exclude = set(punct)
+stop = set(stopwords.words('english'))
 
 def test_set(s):
     return ''.join(ch for ch in s if ch not in exclude)
-
-candidates = list()
-
-globalwords = {}
-DFdict = {}
-
-def processDoc(docwords, name):
-    f1counts = {}
-    for word in docwords:
-        if word in f1counts.keys():
-            f1counts[word]+=1
-        else:
-            f1counts[word] = 1
-    
-    for word in f1counts.keys():
-        if word in globalwords.keys():
-            globalwords[word][name] = f1counts[word]
-        else:
-            globalwords[word] = {}
-            globalwords[word][name] = f1counts[word]
-    return
 
 #exercise 1 - part 1 - reading words
 #english textual document
@@ -61,10 +34,45 @@ for etdsentence in etdsentences:
     etdwords += sentenceclean
 etdbigrams = list(nltk.bigrams(etdwords))
 #print etdbigrams
-
+candidates = list()
 candidates += etdwords
 for bi in etdbigrams:
     candidates += [bi[0]+" "+bi[1]]
+    
+
+train = fetch_20newsgroups(subset='train')
+englishdocplustrain = train.data + candidates
+test = fetch_20newsgroups(subset='test')
+vectorizer2 = TfidfVectorizer( use_idf=True, ngram_range=(1,2) )
+trainvec2 = vectorizer2.fit_transform(englishdocplustrain)
+
+
+
+
+
+
+
+
+globalwords = {}
+DFdict = {}
+
+def processDoc(docwords, name):
+    f1counts = {}
+    for word in docwords:
+        if word in f1counts.keys():
+            f1counts[word]+=1
+        else:
+            f1counts[word] = 1
+    
+    for word in f1counts.keys():
+        if word in globalwords.keys():
+            globalwords[word][name] = f1counts[word]
+        else:
+            globalwords[word] = {}
+            globalwords[word][name] = f1counts[word]
+    return
+
+
 #print str(len(etdwords)) + " words + " + str(len(etdbigrams)) + " bigrams = " + str(len(candidates))
 
 processDoc(candidates, "Alice")
