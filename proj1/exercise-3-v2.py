@@ -9,6 +9,7 @@ import operator
 import re
 
 
+#conversao passo-a-passo da gramatica do enunciado
 #grammar2 = r'(<NN[A-Z]*>)+$'
 #grammar2 = r'(<JJ> <NN[A-Z]*>)+$'
 #grammar2 = r'((<JJ>)* <NN[A-Z]*>)+$'
