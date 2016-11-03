@@ -42,3 +42,29 @@ def filterCandidates(candidatesList):
     return newCandidates
 
 # http://stackoverflow.com/questions/3994493/checking-whole-string-with-a-regex
+
+punct = string.punctuation
+punct = punct.translate(None,"'")
+punctexcludeset = set(punct)
+stop = set(stopwords.words('english'))
+def test_set(s):
+    return ''.join(ch for ch in s if ch not in punctexcludeset)
+def my_tokenizer(documentasstring):
+    docsentences = nltk.sent_tokenize(documentasstring)
+    docwords = list()
+    for docsentence in docsentences:
+        sentencenopunct = test_set(docsentence.lower())
+        sentencewords = nltk.word_tokenize(sentencenopunct)
+        for i in range(len(sentencewords)):
+            word = sentencewords[i]
+            if word[0] == "'":
+                word = word[1:]
+            sentencewords[i] = word
+        sentenceclean = [i for i in sentencewords if i not in stop]
+        docwords += sentenceclean
+    #all the words are split
+    docvalidwords = filterCandidates(docwords)
+    docvalidbigrams = list(nltk.bigrams(docvalidwords))
+    docvalidtrigrams = list(nltk.trigrams(docvalidwords))
+    docvalidterms = docvalidwords + docvalidbigrams + docvalidtrigrams
+    return docvalidterms
