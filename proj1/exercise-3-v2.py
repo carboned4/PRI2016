@@ -9,13 +9,12 @@ import operator
 import re
 
 
-
-grammar = '''OHNE: {DICH+}
-DICH: {(<JJ>* <NN.*>+ <IN>)? <JJ>* <NN.*>+}'''
-grammar2 = r'(("<JJ>"* ("<NN".*">")+ "<IN>")? "<JJ>"* ("<NN".*">")+)+$'
-grammar2 = r'((<JJ>* (<NN.*>)+ <IN>)? <JJ>* (<NN.*>)+)+$'
-grammar2 = r'<NN.*>+$'
-regexparser = nltk.RegexpParser(grammar)
+#grammar2 = r'(<NN[A-Z]*>)+$'
+#grammar2 = r'(<JJ> <NN[A-Z]*>)+$'
+#grammar2 = r'((<JJ>)* <NN[A-Z]*>)+$'
+#grammar2 = r'((<IN>)?(<JJ>)*<NN[A-Z]*>)+$'
+#grammar2 = r'((<IN>)?(<JJ>)*(<NN[A-Z]*>)+)+$'
+grammar2 = r'(((<JJ>)*(<NN[A-Z]*>)+<IN>)?(<JJ>)*(<NN[A-Z]*>)+)+$'
 regexparser2 = re.compile(grammar2)
 def filterCandidates(candidatesList):
     newCandidates = []
@@ -26,7 +25,7 @@ def filterCandidates(candidatesList):
             stringtocheck += taggedterm[1]
         parseResult = regexparser2.match(stringtocheck)
         if parseResult:
-            newCandidates += [candidate] + " "
+            newCandidates += [candidate]
             print "yay"
         newCandidates = newCandidates[:-1]
         """parseTree = regexparser.parse(candidatetags)
