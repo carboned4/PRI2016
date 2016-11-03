@@ -10,6 +10,9 @@ import re
 
 numberofdocuments = 0
 totalwordsperdocument = dict()
+totalwordsincorpus = 0
+documentlengths = dict()
+idfDict = dict()
 
 #conversao passo-a-passo da gramatica do enunciado
 #grammar2 = r'(<NN[A-Z]*>)+$'
@@ -26,7 +29,7 @@ def filterCandidates(candidatesList):
         print candidate
         if isinstance(candidate, tuple):
             candidate = " ".join(candidate)
-            print "was tuple"
+            #print "was tuple"
         print candidate
         candidatetags = nltk.pos_tag(nltk.word_tokenize(candidate))
         for taggedterm in candidatetags:
@@ -36,20 +39,27 @@ def filterCandidates(candidatesList):
             newCandidates += [candidate]
     return newCandidates
 
-# http://stackoverflow.com/questions/3994493/checking-whole-string-with-a-regex
 
 punct = string.punctuation
 punct = punct.translate(None,"'")
 punctexcludeset = set(punct)
 stop = set(stopwords.words('english'))
+docindex = 0
 def test_set(s):
     return ''.join(ch for ch in s if ch not in punctexcludeset)
 def my_tokenizer(documentasstring):
+    #these variables have to be declared here as global so the vectorizer can
+    #see them from our program (we first declared them earlier)
+    global docindex
+    global totalwordsincorpus
+    global numberofdocuments
     docsentences = nltk.sent_tokenize(documentasstring)
     docwords = list()
+    doclength = 0
     for docsentence in docsentences:
         sentencenopunct = test_set(docsentence.lower())
         sentencewords = nltk.word_tokenize(sentencenopunct)
+        doclength += len(sentencewords)
         for i in range(len(sentencewords)):
             word = sentencewords[i]
             if word[0] == "'":
@@ -58,12 +68,17 @@ def my_tokenizer(documentasstring):
         sentenceclean = [i for i in sentencewords if i not in stop]
         docwords += sentenceclean
     #all the words are split
-    print docwords
+    #print docwords
+    totalwordsperdocument[docindex] = doclength
+    print docindex
+    totalwordsincorpus += doclength
     docbigrams = list(nltk.bigrams(docwords))
     doctrigrams = list(nltk.trigrams(docwords))
     docterms = docwords + docbigrams + doctrigrams
-    print docterms
+    #print docterms
     docvalidterms = filterCandidates(docterms)
+    docindex +=1
+    numberofdocuments +=1
     return docvalidterms
 
 
@@ -72,3 +87,11 @@ countVectorizer.build_analyzer()
 docstf = countVectorizer.fit_transform(set([("Alice stopped by the big big station to retrieve the blue poop")]))
 vecvocab = countVectorizer.vocabulary_
 
+def calculateIdf():
+    termindex = 0
+    doci = 0
+    for termindex in range(len(vecvocab)):
+        for doci in range(numberofdocuments):
+            print str(doci) +" " + str(termindex) + " " + str(idfDict.get(doci, termindex))
+            idfDict[vecvocab[termindex]] = idfDict.get(doci, termindex)
+            
