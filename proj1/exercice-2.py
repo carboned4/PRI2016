@@ -58,14 +58,25 @@ vecvocab = vectorizer2.vocabulary_
 
 path = "fao30/indexers/iic1/"
 
-keysfordoc = dict()
-for filename in os.listdir(path):
-    etd = open(path + filename)
-    etdread = etd.read()
-    etdread = etdread.decode('latin-1')
-    etd_keys = etdread.split("\n",-1)[:-1]
-    filename = filename[:-4] + '.txt'
-    keysfordoc[filename] = etd_keys
+indexerIterator = 1
+setForKeys = set()
+while indexerIterator <= 6:
+    for filename in os.listdir(path):
+        etd = open(path + filename)
+        etdread = etd.read()
+        etdread = etdread.decode('latin-1')
+        etd_keys = etdread.split("\n",-1)[:-1]
+        filename = filename[:-4] + '.txt'
+         
+        setForKeys = setForKeys.union(set(etd_keys))
+        
+        #sera muito estupido o que estou a fazer????
+        etd_keys = list(setForKeys)
+        keysfordoc[filename] = etd_keys
+
+        
+    indexerIterator += 1
+    path = path[:-2] + str(indexerIterator) + "/"
 
 
 doccandidateslist = dict()
