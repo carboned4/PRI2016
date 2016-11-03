@@ -1,0 +1,1 @@
+Your application should take as input a file containing several textual documents, one document per line. The input documents should be read from disc and indexed into memory. Once the documents are stored, the application should read a set of keywords from stdin and use it as a query over the indexed documents.

@@ -1,0 +1,1 @@
+﻿Implement a function that reads a file from disc (as described above) and creates an inmemory inverted index of its contents. The efficient construction of disk-based inverted indexes will be covered later on the PRI course and, for now, you should implement a simple in-memory data structure.
