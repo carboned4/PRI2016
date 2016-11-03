@@ -60,24 +60,23 @@ path = "fao30/indexers/iic1/"
 keysfordoc = dict()
 indexerIterator = 1
 setForKeys = set()
-while indexerIterator <= 6:
-    for filename in os.listdir(path):
+for filename in os.listdir(path):
+    while indexerIterator <= 6:
         etd = open(path + filename)
         etdread = etd.read()
         etdread = etdread.decode('latin-1')
         etd_keys = etdread.split("\n",-1)[:-1]
-        filename = filename[:-4] + '.txt'
+        fname = filename[:-4] + '.txt'
          
         setForKeys = setForKeys.union(set(etd_keys))
         
         #sera muito estupido o que estou a fazer????
         etd_keys = list(setForKeys)
-        keysfordoc[filename] = etd_keys
-
-        
-    indexerIterator += 1
-    path = path[:-2] + str(indexerIterator) + "/"
-
+        keysfordoc[fname] = etd_keys
+        indexerIterator += 1
+        path = path[:-2] + str(indexerIterator) + "/"
+    path = "fao30/indexers/iic1/"
+    indexerIterator = 1
 
 doccandidateslist = dict()
 featurenames = list(vectorizer2.get_feature_names())
