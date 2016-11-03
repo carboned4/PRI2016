@@ -57,7 +57,7 @@ vecvocab = vectorizer2.vocabulary_
 ####################
 
 path = "fao30/indexers/iic1/"
-
+keysfordoc = dict()
 indexerIterator = 1
 setForKeys = set()
 while indexerIterator <= 6:
