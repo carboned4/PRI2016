@@ -8,13 +8,16 @@ from sklearn.feature_extraction.text import CountVectorizer
 import operator
 import re
 from math import log10
+import numpy
 
+
+#general statistics that we'll calculate further down
 numberofdocuments = 0
 totalwordsperdocument = dict()
 totalwordsincorpus = 0
-documentlengths = dict()
 
 
+#checking if a term (uni/bi/trigram) matches a regex.
 #conversao passo-a-passo da gramatica do enunciado
 #grammar2 = r'(<NN[A-Z]*>)+$'
 #grammar2 = r'(<JJ> <NN[A-Z]*>)+$'
@@ -38,6 +41,10 @@ def filterCandidates(candidatesList):
     return newCandidates
 
 
+#CUSTOM TOKENIZER
+#this tokenizer will split words, delete stop words and punctuation and
+#transform it into uni/bi/trigrams, which will all be filtered by the regex.
+#some document and general statistics are also calculated here.
 punct = string.punctuation
 punct = punct.translate(None,"'")
 punctexcludeset = set(punct)
@@ -77,11 +84,14 @@ def my_tokenizer(documentasstring):
     return docvalidterms
 
 
+#uses a vectorizer to calculate term frequency
 countVectorizer = CountVectorizer(tokenizer=my_tokenizer)
 countVectorizer.build_analyzer()
 docstf = countVectorizer.fit_transform(set(["Alice stopped by the big big station to retrieve the blue poop","Alice stopped by a poop and was angry"]))
 vecvocab = countVectorizer.vocabulary_
 
+
+#calculates the IDF according to the new formula
 idfDict = dict()
 for termi in range(len(vecvocab)):
     docswithterm = docstf.getcol(termi).getnnz(0)[0]
@@ -89,6 +99,8 @@ for termi in range(len(vecvocab)):
     denominator = docswithterm +0.5
     idfDict[termi] = log10(numerator/denominator)
 
+
+#calculates the BM25 for a term,document
 k1 = 1.2
 b = 0.75
 def score(document, termi):
@@ -101,9 +113,27 @@ def score(document, termi):
     scoredt = idfpart * (numeratorpart / denominatorpart)
     return scoredt
 
+
+#all the scores will be calculated here
 dictscores = dict()
 for doci in range(numberofdocuments):
     documentscores = dict()
     for termi in range(len(vecvocab)):
         documentscores[termi] = score(doci, termi)
     dictscores[doci] = documentscores
+
+
+doccandidateslist = dict()
+featurenames = list(countVectorizer.get_feature_names())
+featurenamescopy = numpy.array(featurenames)
+for idoc in range(numberofdocuments):
+    bm25doccopy = numpy.array(dictscores[idoc].values())
+    #the keys were inserted by order, so the values were by this order as well
+    sortedindices = (bm25doccopy.argsort()[-5:])[::-1]
+    candidatewordsfordoc = list()
+    for candidatei in sortedindices:
+        candidatewordsfordoc += [featurenamescopy[candidatei]]
+    doccandidateslist[idoc] = candidatewordsfordoc
+    #print docname
+    #print candidatewordsfordoc
+    
