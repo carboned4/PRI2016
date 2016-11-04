@@ -100,3 +100,4 @@ def score(document, term):
     denominatorpart = ftD + k1 * (1 - b + b * (totalwordsperdocument[document]/avgdl) )
     scoredt = idfpart * (numeratorpart / denominatorpart)
     return scoredt
+
