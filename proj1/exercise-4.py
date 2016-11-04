@@ -1,63 +1,109 @@
-# coding=utf-8
-# python kldiv.py foreground.txt background.txt
-
-import re
-import sys
-import math
+import nltk
+import string
+from nltk.tokenize import RegexpTokenizer
+from nltk.corpus import stopwords
+from nltk.collocations import *
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.feature_extraction.text import CountVectorizer
 import operator
+import re
+from math import log10
+import numpy
 
 
-foreground_file = sys.argv[1]
-background_file = sys.argv[2]
+#general statistics that we'll calculate further down
+numberofdocuments = 0
+totalwordsperdocument = dict()
+totalwordsincorpus = 0
 
-def tokenize(t):
-    text = t.lower()
-    text = re.sub("\n"," ",text)
-    text = re.sub(r'<[^>]+>',"",text) # remove all html markup
-    text = re.sub('[^a-zèéeêëûüùôöòóœøîïíàáâäæãå&@#A-Z0-9- \']', "", text)
-    wrds = text.split()
-    return wrds
+#maximum number of words in an N-gram (approximation)
+maxN = 3
 
 
-stoplist = set()
-print("Read stopword list")
-with open(r'stoplist_dutch.txt') as stoplist_file:
-    for line in stoplist_file:
-        stopword = line.rstrip()
-        stoplist.add(stopword)
+#CUSTOM TOKENIZER
+#this tokenizer will split words, delete stop words and punctuation and
+#transform it into uni/bi/trigrams, which will all be filtered by the regex.
+#some document and general statistics are also calculated here.
+punct = string.punctuation
+punct = punct.translate(None,"'")
+punctexcludeset = set(punct)
+stop = set(stopwords.words('english'))
+docindex = 0
+def test_set(s):
+    return ''.join(ch for ch in s if ch not in punctexcludeset)
+
+def my_tokenizer(documentasstring):
+    #these variables have to be declared here as global so the vectorizer can
+    #see them from our program (we first declared them earlier)
+    global docindex
+    global totalwordsincorpus
+    global numberofdocuments
+    global maxN
+    docsentences = nltk.sent_tokenize(documentasstring)
+    docwords = list()
+    doclength = 0
+    for docsentence in docsentences:
+        sentencenopunct = test_set(docsentence.lower())
+        sentencewords = nltk.word_tokenize(sentencenopunct)
+        doclength += len(sentencewords)
+        for i in range(len(sentencewords)):
+            word = sentencewords[i]
+            if word[0] == "'":
+                word = word[1:]
+            sentencewords[i] = word
+        sentenceclean = [i for i in sentencewords if i not in stop]
+        docwords += sentenceclean
+    totalwordsperdocument[docindex] = doclength
+    totalwordsincorpus += doclength
+    #all the words are split
+    docbigrams = []
+    doctrigrams = []
+    for iword in range(len(docwords)):
+        if maxN >= 2:
+            if iword < len(docwords)-1:
+                bigram = docwords[iword] + " " + docwords[iword+1]
+                #print bigram
+                docbigrams += [bigram]
+                if maxN >= 3:
+                    #print "enter max 3"            
+                    if iword < len(docwords)-2:
+                        trigram = docwords[iword] + " " + docwords[iword+1] + " " + docwords[iword+2]
+                        doctrigrams += [trigram]
+    docterms = docwords + docbigrams + doctrigrams
+    
+    docindex +=1
+    numberofdocuments +=1
+    return docterms
 
 
-def get_all_ngrams (text,maxn) :
-    words = tokenize(text)
-    i=0
-    terms = dict()
-    for word in words :
-        if word not in stoplist and len(word) > 1 and '@' not in word:
-            if word in terms :
-                terms[word] += 1
-            else :
-                terms[word] = 1
-        if maxn >= 2 :
-            if i< len(words)-1 :
-                if words[i] not in stoplist and words[i+1] not in stoplist:
-                    bigram = words[i]+ " " +words[i+1]
-                    if bigram in terms :
-                        terms[bigram] += 1
-                    else :
-                        terms[bigram] = 1
 
-                if maxn >= 3 :
-                    if i < len(words)-2 :
-                        if not words[i] in stoplist and not words[i+2] in stoplist:
-                            # middle word can be a stopword
-                            trigram = words[i]+ " " +words[i+1]+ " " +words[i+2]
-                            if trigram in terms :
-                                terms[trigram] += 1
-                            else :
-                                terms[trigram] = 1
-        i += 1
-    return terms
+#PROCESSING:
 
+#documents from FAO30 (same as exercise-2)
+
+import os
+path = "fao30/documents/"
+
+all_docs = []
+docindexnames = dict()
+docreadindex = 0
+for filename in os.listdir(path):
+    docindexnames[docreadindex] = filename
+    etd = open(path + filename)
+    etdread = etd.read()
+    etdread = etdread.decode('latin-1')
+    etd_words = nltk.word_tokenize(etdread)
+    all_docs += [etdread]
+    docreadindex += 1
+
+
+
+#uses a vectorizer to calculate term frequency
+countVectorizer = CountVectorizer(tokenizer=my_tokenizer)
+countVectorizer.build_analyzer()
+#docstf = countVectorizer.fit_transform(set(["Alice stopped by the big big station to retrieve the blue poop","Alice stopped by a poop and was angry"]))
+docstf = countVectorizer.fit_transform(all_docs)
+vecvocab = countVectorizer.vocabulary_
 
 def read_text_in_dict(text):
     freq_dict = get_all_ngrams(text,3)
