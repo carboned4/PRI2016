@@ -102,16 +102,16 @@ for filename in os.listdir(path):
     all_docs += [etdread]
     docreadindex += 1
     if docreadindex == 5:
-        break
 
-print "a"
+
+
 #uses a vectorizer to calculate term frequency
 countVectorizer = CountVectorizer(tokenizer=my_tokenizer)
 countVectorizer.build_analyzer()
 #docstf = countVectorizer.fit_transform(set(["Alice stopped by the big big station to retrieve the blue poop","Alice stopped by a poop and was angry"]))
 docstf = countVectorizer.fit_transform(all_docs)
 vecvocab = countVectorizer.vocabulary_
-print "b"
+
 
 
 #calculates the IDF according to the new formula
