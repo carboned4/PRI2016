@@ -38,6 +38,7 @@ def my_tokenizer(documentasstring):
     #see them from our program (we first declared them earlier)
     global docindex
     global totalwordsincorpus
+    global totaltermsincorpus
     global numberofdocuments
     global maxN
     docsentences = nltk.sent_tokenize(documentasstring)
