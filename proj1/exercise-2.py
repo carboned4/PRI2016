@@ -115,8 +115,7 @@ for idoc in range(len(docindexnames)):
     measures["f1"] = f1
     measuresdoc[docname] = measures
 #calculate AP and therefore MAP
-ap = 0
-apdict = dict()
+aptotalsum = 0
 for idoc in range(len(docindexnames)):
     docname = docindexnames[idoc]
     setrelevant = set(keysfordoc[docname])
@@ -128,8 +127,7 @@ for idoc in range(len(docindexnames)):
     re = sizeInt/(0.0+sizeRel)
     listansweri = []
     setansweri = set()
-    ap=dict()
-    apsum = 0
+    apitersum = 0
     for term in range(len(doccandidateslist[docname])):
         listansweri += [doccandidateslist[docname][term]]
         setanseri = set(listansweri)
@@ -139,14 +137,13 @@ for idoc in range(len(docindexnames)):
             r = 1
         else:
             r = 0
-        ap[term+1] = (p * r) / (sizeRel+0.0)
-        apsum +=  (p * r) / (sizeRel+0.0)
-    apdict[docname] = ap
-    measuresdoc[docname]["map"] = apsum/(0.0+len(doccandidateslist[docname]))
-    ap = 0
+        apitersum += (p * r)
+    ap = apitersum  / (sizeRel+0.0)
+    measuresdoc[docname]["ap"] = ap
+    aptotalsum += ap
     listanswer = []
     setansweri = set()
 
         
 print measuresdoc
-print apdict
+print "map: " + str(aptotalsum/len(docindexnames))
