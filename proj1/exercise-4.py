@@ -15,6 +15,7 @@ import numpy
 numberofdocuments = 0
 totalwordsperdocument = dict()
 totalwordsincorpus = 0
+totaltermsincorpus = 0
 
 #maximum number of words in an N-gram (approximation)
 maxN = 3
@@ -70,7 +71,7 @@ def my_tokenizer(documentasstring):
                         trigram = docwords[iword] + " " + docwords[iword+1] + " " + docwords[iword+2]
                         doctrigrams += [trigram]
     docterms = docwords + docbigrams + doctrigrams
-    
+    totaltermsincorpus += len(docterms)
     docindex +=1
     numberofdocuments +=1
     return docterms
@@ -105,6 +106,8 @@ countVectorizer.build_analyzer()
 docstf = countVectorizer.fit_transform(all_docs)
 vecvocab = countVectorizer.vocabulary_
 
+
+"""
 def read_text_in_dict(text):
     freq_dict = get_all_ngrams(text,3)
     total_term_count = 0
@@ -122,10 +125,10 @@ def print_top_n_terms(score_dict,n):
         print(term,score)
         if i==n:
             break
-
+"""
 #fg_dict, bg_dict = dict(),dict()
 #fg_term_count, bg_term_count = 0,0
-
+"""
 print("Read foreground file",foreground_file)
 with open(foreground_file,'r') as fg:
     fgtext=fg.read()
@@ -135,8 +138,9 @@ print("Read background file",background_file)
 with open(background_file,'r') as bg:
     bgtext=bg.read()
     bg_dict, bg_term_count = read_text_in_dict(bgtext)
+"""
 
-print("Calculate kldiv per term in foregound corpus")
+"""
 kldiv_per_term = dict()
 for term in fg_dict:
     fg_freq = fg_dict[term]
@@ -166,3 +170,62 @@ for term in fg_dict:
 
 print("\n\nTop terms:")
 print_top_n_terms(kldiv_per_term,10)
+
+"""
+
+accumulatefreqDict = dict()
+for termi in range(len(vecvocab)):
+    acumforterm = docstf.getcol(termi).sum(0)[0]
+    accumulatefreqDict[termi] = acumforterm
+
+
+
+#calculates the phraseness for a term,document
+def phraseness(documentn, termi):
+    #pw = lmn bg - we use the approximation
+    #qw = lm1 bg (unigram) - words are independent so we
+    #just multiply their probabilities
+    pw = float(accumulatefreqDict[termi])/float(totaltermsincorpus)    
+    termunigrams = termi.split()
+    qw = 1
+    for uni in termunigrams:
+        qw *= float(accumulatefreqDict[uni])/float(totalwordsincorpus)
+    return pw*log10(pw/qw)
+
+
+#calculates the informativeness for a term,document
+def informativeness(documentn, termi):
+    #pw = lm1 fg (unigram)
+    #qw = lm1 bg (unigram)
+    # words are independent so we just multiply their probabilities    
+    termunigrams = termi.split()
+    pw = 1
+    for uni in termunigrams:
+            pw *= float(docstf[documentn, uni])/float(totalwordsperdocument[documentn])
+    qw = 1
+    for uni in termunigrams:
+        qw *= float(accumulatefreqDict[uni])/float(totalwordsincorpus)
+    return pw*log10(pw/qw)
+
+
+#all the scores will be calculated here
+dictscores = dict()
+for doci in range(numberofdocuments):
+    documentscores = dict()
+    for termi in range(len(vecvocab)):
+        documentscores[termi] = informativeness(doci, termi) + phraseness(doci, termi)
+    dictscores[doci] = documentscores
+
+
+doccandidateslist = dict()
+featurenames = list(countVectorizer.get_feature_names())
+featurenamescopy = numpy.array(featurenames)
+for idoc in range(numberofdocuments):
+    probdoccopy = numpy.array(dictscores[idoc].values())
+    #the keys were inserted by order, so the values were by this order as well
+    sortedindices = (probdoccopy.argsort()[-5:])[::-1]
+    candidatewordsfordoc = list()
+    for candidatei in sortedindices:
+        candidatewordsfordoc += [featurenamescopy[candidatei]]
+    doccandidateslist[idoc] = candidatewordsfordoc
+    

@@ -43,7 +43,7 @@ for bi in etdbigrams:
 train = fetch_20newsgroups(subset='train')
 englishdocplustrain = train.data + candidates
 test = fetch_20newsgroups(subset='test')
-vectorizer2 = TfidfVectorizer( use_idf=True, ngram_range=(1,2) )
+vectorizer2 = TfidfVectorizer( use_idf=True, ngram_range=(1,2))
 trainvec2 = vectorizer2.fit_transform(englishdocplustrain)
 
 
@@ -72,8 +72,6 @@ def processDoc(docwords, name):
             globalwords[word][name] = f1counts[word]
     return
 
-
-#print str(len(etdwords)) + " words + " + str(len(etdbigrams)) + " bigrams = " + str(len(candidates))
 
 processDoc(candidates, "Alice")
 vec3vocab = vectorizer2.vocabulary_

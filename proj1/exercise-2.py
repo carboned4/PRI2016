@@ -11,7 +11,7 @@ from sklearn.metrics import f1_score
 import operator
 import numpy
 
-    
+#quicksort   
 def sort(array):
     less = []
     equal = []
@@ -26,13 +26,11 @@ def sort(array):
                 equal.append(x)
             if x > pivot:
                 greater.append(x)
-        # Don't forget to return something!
-        return sort(less)+equal+sort(greater)  # Just use the + operator to join lists
-    # Note that you want equal ^^^^^ not pivot
-    else:  # You need to hande the part at the end of the recursion - when you only have one element in your array, just return the array.
+        return sort(less)+equal+sort(greater) 
+    else: 
         return array
 
-
+#import 30 documents
 import os
 path = "fao30/documents/"
 
@@ -50,12 +48,14 @@ for filename in os.listdir(path):
 
 stop = set(stopwords.words('english'))
 
+#build tk-idf array with unigrams and bigrams and exclude stop_words 
 vectorizer2 = TfidfVectorizer( use_idf=True, ngram_range=(1,2), stop_words=stop )
 docstfidf = vectorizer2.fit_transform(all_docs)
 vecvocab = vectorizer2.vocabulary_
 
-####################
 
+####################
+#get all relevants and merge the relevants for the same documents
 path = "fao30/indexers/iic1/"
 keysfordoc = dict()
 indexerIterator = 1
@@ -70,7 +70,6 @@ for filename in os.listdir(path):
          
         setForKeys = setForKeys.union(set(etd_keys))
         
-        #sera muito estupido o que estou a fazer????
         etd_keys = list(setForKeys)
         keysfordoc[fname] = etd_keys
         indexerIterator += 1
@@ -78,6 +77,8 @@ for filename in os.listdir(path):
     path = "fao30/indexers/iic1/"
     indexerIterator = 1
 
+
+#calculate tf-idf for each document
 doccandidateslist = dict()
 featurenames = list(vectorizer2.get_feature_names())
 for idoc in range(len(docindexnames)):
@@ -89,12 +90,10 @@ for idoc in range(len(docindexnames)):
     for candidatei in sortedindices:
         candidatewordsfordoc += [featurenamescopy[candidatei]]
     doccandidateslist[docname] = candidatewordsfordoc
-    #print docname
-    #print candidatewordsfordoc
     
 
     
-
+#calculate precision, reccall and f1
 measuresdoc = dict()
 for idoc in range(len(docindexnames)):
     measures= dict()
@@ -115,7 +114,7 @@ for idoc in range(len(docindexnames)):
     measures["re"] = re
     measures["f1"] = f1
     measuresdoc[docname] = measures
-
+#calculate AP and therefore MAP
 ap = 0
 apdict = dict()
 for idoc in range(len(docindexnames)):
@@ -139,7 +138,6 @@ for idoc in range(len(docindexnames)):
         if doccandidateslist[docname][term] in keysfordoc[docname]:
             r = 1
         else:
-            #print docname
             r = 0
         ap[term+1] = (p * r) / (sizeRel+0.0)
         apsum +=  (p * r) / (sizeRel+0.0)
