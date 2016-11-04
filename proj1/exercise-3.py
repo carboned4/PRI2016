@@ -156,6 +156,6 @@ for idoc in range(numberofdocuments):
     for candidatei in sortedindices:
         candidatewordsfordoc += [featurenamescopy[candidatei]]
     doccandidateslist[idoc] = candidatewordsfordoc
-    #print docname
-    #print candidatewordsfordoc
+
     
+print doccandidateslist

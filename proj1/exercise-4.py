@@ -164,3 +164,4 @@ for idoc in range(numberofdocuments):
         candidatewordsfordoc += [featurenamescopy[candidatei]]
     doccandidateslist[idoc] = candidatewordsfordoc
     
+print doccandidateslist

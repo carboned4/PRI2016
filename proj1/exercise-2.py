@@ -148,4 +148,5 @@ for idoc in range(len(docindexnames)):
     setansweri = set()
 
         
-        
+print measuresdoc
+print apdict
