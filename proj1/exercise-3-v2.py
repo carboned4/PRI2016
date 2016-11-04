@@ -83,21 +83,27 @@ docstf = countVectorizer.fit_transform(set(["Alice stopped by the big big statio
 vecvocab = countVectorizer.vocabulary_
 
 idfDict = dict()
-for term in vecvocab:
-    docswithterm = docstf.getcol(vecvocab[term]).getnnz(0)[0]
+for termi in range(len(vecvocab)):
+    docswithterm = docstf.getcol(termi).getnnz(0)[0]
     numerator = numberofdocuments - docswithterm +0.5
     denominator = docswithterm +0.5
-    idfDict[term] = log10(numerator/denominator)
+    idfDict[termi] = log10(numerator/denominator)
 
 k1 = 1.2
 b = 0.75
-def score(document, term):
-    idfpart = idfDict[term]
-    ftD = docstf[document,vecvocab[term]]
+def score(document, termi):
+    idfpart = idfDict[termi]
+    ftD = docstf[document,termi]
     avgdl = totalwordsincorpus/(0.0+numberofdocuments)
-    print ftD
+    #print ftD
     numeratorpart = ftD * (k1 + 1)
     denominatorpart = ftD + k1 * (1 - b + b * (totalwordsperdocument[document]/avgdl) )
     scoredt = idfpart * (numeratorpart / denominatorpart)
     return scoredt
 
+dictscores = dict()
+for doci in range(numberofdocuments):
+    documentscores = dict()
+    for termi in range(len(vecvocab)):
+        documentscores[termi] = score(doci, termi)
+    dictscores[doci] = documentscores
