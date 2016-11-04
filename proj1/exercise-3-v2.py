@@ -83,12 +83,35 @@ def my_tokenizer(documentasstring):
     numberofdocuments +=1
     return docvalidterms
 
+#PROCESSING:
 
+#documents from FAO30 (same as exercise-2)
+
+import os
+path = "fao30/documents/"
+
+all_docs = []
+docindexnames = dict()
+docreadindex = 0
+for filename in os.listdir(path):
+    docindexnames[docreadindex] = filename
+    etd = open(path + filename)
+    etdread = etd.read()
+    etdread = etdread.decode('latin-1')
+    etd_words = nltk.word_tokenize(etdread)
+    all_docs += [etdread]
+    docreadindex += 1
+    if docreadindex == 5:
+        break
+
+print "a"
 #uses a vectorizer to calculate term frequency
 countVectorizer = CountVectorizer(tokenizer=my_tokenizer)
 countVectorizer.build_analyzer()
-docstf = countVectorizer.fit_transform(set(["Alice stopped by the big big station to retrieve the blue poop","Alice stopped by a poop and was angry"]))
+#docstf = countVectorizer.fit_transform(set(["Alice stopped by the big big station to retrieve the blue poop","Alice stopped by a poop and was angry"]))
+docstf = countVectorizer.fit_transform(all_docs)
 vecvocab = countVectorizer.vocabulary_
+print "b"
 
 
 #calculates the IDF according to the new formula
@@ -103,13 +126,13 @@ for termi in range(len(vecvocab)):
 #calculates the BM25 for a term,document
 k1 = 1.2
 b = 0.75
-def score(document, termi):
+def score(documentn, termi):
     idfpart = idfDict[termi]
-    ftD = docstf[document,termi]
+    ftD = docstf[documentn,termi]
     avgdl = totalwordsincorpus/(0.0+numberofdocuments)
     #print ftD
     numeratorpart = ftD * (k1 + 1)
-    denominatorpart = ftD + k1 * (1 - b + b * (totalwordsperdocument[document]/avgdl) )
+    denominatorpart = ftD + k1 * (1 - b + b * (totalwordsperdocument[documentn]/avgdl) )
     scoredt = idfpart * (numeratorpart / denominatorpart)
     return scoredt
 
