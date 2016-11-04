@@ -101,7 +101,6 @@ for filename in os.listdir(path):
     etd_words = nltk.word_tokenize(etdread)
     all_docs += [etdread]
     docreadindex += 1
-    if docreadindex == 5:
 
 
 
