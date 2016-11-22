@@ -1,0 +1,1 @@
+https://github.com/ipython/talks/blob/master/parallel/text_analysis.py
