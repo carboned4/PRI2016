@@ -57,7 +57,7 @@ graphmatrix = list()
 termindexes = dict()
 for iterm in range(len(alltermslist)):
     termindexes[alltermslist[iterm]] = iterm;
-    graphmatrix += [[None]]
+    graphmatrix += [list()]
     for iterm2 in range(len(alltermslist)):
         graphmatrix[iterm] += [0]
 
@@ -72,9 +72,11 @@ depois, iterar em triângulo para criar a matriz do grafo.
 for isentence in sentenceslists:
     for iterm in range(len(isentence)-1):
         for iterm2 in range(iterm+1,len(isentence)):
-            print str(len(isentence)) + " " +str(iterm) + " " + str(iterm2)
-            graphmatrix[iterm][iterm2] = 1
-            graphmatrix[iterm2][iterm] = 1
+            term1 = termindexes[isentence[iterm]]
+            term2 = termindexes[isentence[iterm2]]
+            print str(len(isentence)) + " " +str(term1) + " " + str(term2)
+            graphmatrix[term1][term2] = 1
+            graphmatrix[term2][term1] = 1
 
 """
 http://stackoverflow.com/questions/464864/how-to-get-all-possible-combinations-of-a-list-s-elements
