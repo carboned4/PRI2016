@@ -20,7 +20,9 @@ etd = open('englishtextualdoc.txt')
 etdread = etd.read()
 etdread = etdread.decode('utf-8')
 etdsentences = nltk.sent_tokenize(etdread)
-sentencessets = []
+
+sentenceslists = []
+alltermsset = set()
 for etdsentence in etdsentences:
     sentenceset = set()
     
@@ -46,15 +48,32 @@ for etdsentence in etdsentences:
                 trigram = sentenceclean[iword] + " " + sentenceclean[iword+1] + " " + sentenceclean[iword+2]
                 doctrigrams += [trigram]
     sentenceset = sentenceset.union(set(docbigrams).union(set(doctrigrams)))
-    sentencessets += [list(sentenceset)]
+    sentenceslists += [list(sentenceset)]
+    alltermsset = alltermsset.union(sentenceset)
+
+alltermslist = list(alltermsset)
+
+graphmatrix = list()
+termindexes = dict()
+for iterm in range(len(alltermslist)):
+    termindexes[alltermslist[iterm]] = iterm;
+    graphmatrix[iterm] = list()
 
 print "sentencesets"
 """
 sentencesets
 aqui já criou uma lista de termos (uni, bi, tri) para cada frase, sem repetições.
+também já criou o mapeamento termo-índice e a matriz do garfo.
 depois, iterar em triângulo para criar a matriz do grafo.
 """
 
+for isentence in sentenceslists:
+    for iterm in range(len(isentence)):
+        
+        
+        """
+        http://stackoverflow.com/questions/464864/how-to-get-all-possible-combinations-of-a-list-s-elements
+        """
 
 globalwords = {}
 DFdict = {}
