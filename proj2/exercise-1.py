@@ -57,7 +57,9 @@ graphmatrix = list()
 termindexes = dict()
 for iterm in range(len(alltermslist)):
     termindexes[alltermslist[iterm]] = iterm;
-    graphmatrix[iterm] = list()
+    graphmatrix += [[None]]
+    for iterm2 in range(len(alltermslist)):
+        graphmatrix[iterm] += [0]
 
 print "sentencesets"
 """
@@ -68,12 +70,15 @@ depois, iterar em triângulo para criar a matriz do grafo.
 """
 
 for isentence in sentenceslists:
-    for iterm in range(len(isentence)):
-        
-        
-        """
-        http://stackoverflow.com/questions/464864/how-to-get-all-possible-combinations-of-a-list-s-elements
-        """
+    for iterm in range(len(isentence)-1):
+        for iterm2 in range(iterm+1,len(isentence)):
+            print str(len(isentence)) + " " +str(iterm) + " " + str(iterm2)
+            graphmatrix[iterm][iterm2] = 1
+            graphmatrix[iterm2][iterm] = 1
+
+"""
+http://stackoverflow.com/questions/464864/how-to-get-all-possible-combinations-of-a-list-s-elements
+"""
 
 globalwords = {}
 DFdict = {}
