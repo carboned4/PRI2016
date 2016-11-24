@@ -52,12 +52,19 @@ for etdsentence in etdsentences:
     alltermsset = alltermsset.union(sentenceset)
 
 alltermslist = list(alltermsset)
+pagerankiterations = list()
+pagerankiterations += [[]]
+bigN = len(sentenceslists)
+previousPRiteration = 0
+print pagerankiterations
+print str(len(pagerankiterations))
 
 graphmatrix = list()
 termindexes = dict()
 for iterm in range(len(alltermslist)):
     termindexes[alltermslist[iterm]] = iterm;
     graphmatrix += [dict()]
+    pagerankiterations[0]+=[1.0/bigN]
 
 print "sentencesets"
 """
@@ -72,13 +79,28 @@ for isentence in sentenceslists:
         for iterm2 in range(iterm+1,len(isentence)):
             term1 = termindexes[isentence[iterm]]
             term2 = termindexes[isentence[iterm2]]
-            print str(len(isentence)) + " " +str(term1) + " " + str(term2)
+            #print str(len(isentence)) + " " +str(term1) + " " + str(term2)
             graphmatrix[term1][term2] = 1
             graphmatrix[term2][term1] = 1
 
 """
+^ ao invés daquele truque de iterar em triângulo, podia tentar-se isto:
 http://stackoverflow.com/questions/464864/how-to-get-all-possible-combinations-of-a-list-s-elements
 """
+damper = 0.15
+def pageranki(pi):
+    sum = 0
+    for pjlinkofpi in graphmatrix[pi].keys():
+        sum += pagerankiterations[previousPRiteration][pjlinkofpi]/(len(graphmatrix[pjlinkofpi]))
+    return damper/bigN+(1-damper)*sum
+
+for iterationi in range(1,51):
+    pagerankiterations += [list()]
+    for pi in range(len(alltermslist)):
+        pagerankiterations[iterationi] += [pageranki(pi)]
+    # MISSING - check if order is still the same
+    previousPRiteration = iterationi
+
 
 globalwords = {}
 DFdict = {}
