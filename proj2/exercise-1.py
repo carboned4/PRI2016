@@ -57,9 +57,7 @@ graphmatrix = list()
 termindexes = dict()
 for iterm in range(len(alltermslist)):
     termindexes[alltermslist[iterm]] = iterm;
-    graphmatrix += [list()]
-    for iterm2 in range(len(alltermslist)):
-        graphmatrix[iterm] += [0]
+    graphmatrix += [dict()]
 
 print "sentencesets"
 """
