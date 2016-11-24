@@ -101,36 +101,8 @@ for iterationi in range(1,51):
     # MISSING - check if order is still the same
     previousPRiteration = iterationi
 
-
-globalwords = {}
-DFdict = {}
-
-def processDoc(docwords, name):
-    f1counts = {}
-    for word in docwords:
-        if word in f1counts.keys():
-            f1counts[word]+=1
-        else:
-            f1counts[word] = 1
-    
-    for word in f1counts.keys():
-        if word in globalwords.keys():
-            globalwords[word][name] = f1counts[word]
-        else:
-            globalwords[word] = {}
-            globalwords[word][name] = f1counts[word]
-    return
-
-
-processDoc(candidates, "Alice")
-vec3vocab = vectorizer2.vocabulary_
-idfdict = {}
-for term in candidates:
-    try:
-        idfdict[term] = vectorizer2.idf_[vec3vocab[term]] * globalwords[term]['Alice']
-    except Exception:
-        pass
-
+"""
 sorted_x = sorted(idfdict.items(), key=operator.itemgetter(1))
 for i in range(5):
     print sorted_x[i]
+"""
