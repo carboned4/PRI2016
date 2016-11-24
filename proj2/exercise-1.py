@@ -3,7 +3,7 @@ import string
 from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
 from nltk.collocations import *
-import operator
+import numpy
 
 punct = string.punctuation
 punct = punct.translate(None,"'")
@@ -28,13 +28,17 @@ for etdsentence in etdsentences:
     
     sentencenopunct = test_set(etdsentence.lower())
     sentencewords = nltk.word_tokenize(sentencenopunct)
+    sentencewords2 = list()
     for i in range(len(sentencewords)):
         word = sentencewords[i]
         if word[0] == "'":
             word = word[1:]
-        if word != "":
-            sentencewords[i] = word
-    sentenceclean = [i for i in sentencewords if i not in stop]
+        if word == "'":
+            continue
+        if word == "":
+            continue
+        sentencewords2 += [word]
+    sentenceclean = [i for i in sentencewords2 if i not in stop]
     
     sentenceset = set(sentenceclean)
     
@@ -54,10 +58,17 @@ for etdsentence in etdsentences:
 alltermslist = list(alltermsset)
 pagerankiterations = list()
 pagerankiterations += [[]]
-bigN = len(sentenceslists)
-previousPRiteration = 0
-print pagerankiterations
-print str(len(pagerankiterations))
+sortediterations = list()
+sortediterations += [[]]
+bigN = len(alltermslist)
+lastPRiteration = 0
+
+
+def sortIteration(it):
+    iterationcopy = numpy.array(pagerankiterations[it])
+    sortedindices = (iterationcopy.argsort())[::-1]
+    return sortedindices
+
 
 graphmatrix = list()
 termindexes = dict()
@@ -65,14 +76,9 @@ for iterm in range(len(alltermslist)):
     termindexes[alltermslist[iterm]] = iterm;
     graphmatrix += [dict()]
     pagerankiterations[0]+=[1.0/bigN]
+sortediterations[0] = sortIteration(0)
 
-print "sentencesets"
-"""
-sentencesets
-aqui já criou uma lista de termos (uni, bi, tri) para cada frase, sem repetições.
-também já criou o mapeamento termo-índice e a matriz do garfo.
-depois, iterar em triângulo para criar a matriz do grafo.
-"""
+
 
 for isentence in sentenceslists:
     for iterm in range(len(isentence)-1):
@@ -83,26 +89,43 @@ for isentence in sentenceslists:
             graphmatrix[term1][term2] = 1
             graphmatrix[term2][term1] = 1
 
-"""
-^ ao invés daquele truque de iterar em triângulo, podia tentar-se isto:
-http://stackoverflow.com/questions/464864/how-to-get-all-possible-combinations-of-a-list-s-elements
-"""
+
+
 damper = 0.15
 def pageranki(pi):
     sum = 0
     for pjlinkofpi in graphmatrix[pi].keys():
-        sum += pagerankiterations[previousPRiteration][pjlinkofpi]/(len(graphmatrix[pjlinkofpi]))
+        sum += pagerankiterations[lastPRiteration][pjlinkofpi]/(len(graphmatrix[pjlinkofpi]))
     return damper/bigN+(1-damper)*sum
+
+def checkOrderIsDifferent(ii):
+    sortdifferent = False
+    for iterm in range(len(sortediterations[ii])):
+        if sortediterations[ii][iterm] != sortediterations[ii-1][iterm]:
+            sortdifferent = True
+            break
+    return sortdifferent
+            
+
 
 for iterationi in range(1,51):
     pagerankiterations += [list()]
     for pi in range(len(alltermslist)):
         pagerankiterations[iterationi] += [pageranki(pi)]
-    # MISSING - check if order is still the same
-    previousPRiteration = iterationi
+    sortediterations += [sortIteration(iterationi)]
+    orderisdifferent = checkOrderIsDifferent(iterationi)
+    lastPRiteration = iterationi
+    if orderisdifferent != True:
+        break
 
-"""
-sorted_x = sorted(idfdict.items(), key=operator.itemgetter(1))
-for i in range(5):
-    print sorted_x[i]
-"""
+
+
+top5indices = sortediterations[lastPRiteration][:5]
+top5ranked = list()
+for itop in top5indices:
+    top5ranked += [(alltermslist[itop],pagerankiterations[lastPRiteration][itop])]
+
+
+print "\n" + str(lastPRiteration) + " iterations"
+print "term , pagerank"
+print top5ranked
