@@ -95,8 +95,8 @@ for isentence in sentenceslists:
 damper = 0.15
 def pageranki(pi):
     sum = 0
-    for pjlinkofpi in graphmatrix[pi].keys():
-        sum += pagerankiterations[lastPRiteration][pjlinkofpi]/(len(graphmatrix[pjlinkofpi]))
+    for pjLinkOfpi in graphmatrix[pi].keys():
+        sum += pagerankiterations[lastPRiteration][pjLinkOfpi]/(len(graphmatrix[pjLinkOfpi]))
     return damper/bigN+(1-damper)*sum
 
 def checkOrderIsDifferent(ii):
