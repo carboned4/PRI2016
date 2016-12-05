@@ -61,6 +61,7 @@ pagerankiterations += [[]]
 sortediterations = list()
 sortediterations += [[]]
 bigN = len(alltermslist)
+przero = 1.0/bigN
 lastPRiteration = 0
 
 
@@ -75,7 +76,7 @@ termindexes = dict()
 for iterm in range(len(alltermslist)):
     termindexes[alltermslist[iterm]] = iterm;
     graphmatrix += [dict()]
-    pagerankiterations[0]+=[1.0/bigN]
+    pagerankiterations[0] += [przero]
 sortediterations[0] = sortIteration(0)
 
 
