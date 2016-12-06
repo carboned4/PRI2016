@@ -4,7 +4,7 @@ from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
 from nltk.collocations import *
 from sklearn.datasets import fetch_20newsgroups
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 import operator
 import re
 from math import log10
@@ -17,30 +17,6 @@ totalwordsperdocument = dict()
 totalwordsincorpus = 0
 
 
-#checking if a term (uni/bi/trigram) matches a regex.
-#conversao passo-a-passo da gramatica do enunciado
-#grammar2 = r'(<NN[A-Z]*>)+$'
-#grammar2 = r'(<JJ> <NN[A-Z]*>)+$'
-#grammar2 = r'((<JJ>)* <NN[A-Z]*>)+$'
-#grammar2 = r'((<IN>)?(<JJ>)*<NN[A-Z]*>)+$'
-#grammar2 = r'((<IN>)?(<JJ>)*(<NN[A-Z]*>)+)+$'
-grammar2 = r'(((<JJ>)*(<NN[A-Z]*>)+<IN>)?(<JJ>)*(<NN[A-Z]*>)+)+$'
-regexparser2 = re.compile(grammar2)
-def filterCandidates(candidatesList):
-    newCandidates = []
-    for candidate in candidatesList:
-        stringtocheck = ""
-        if isinstance(candidate, tuple):
-            candidate = " ".join(candidate)
-        candidatetags = nltk.pos_tag(nltk.word_tokenize(candidate))
-        for taggedterm in candidatetags:
-            stringtocheck += "<"+taggedterm[1]+">"
-        parseResult = regexparser2.match(stringtocheck)
-        if parseResult:
-            newCandidates += [candidate]
-    return newCandidates
-
-
 #CUSTOM TOKENIZER
 #this tokenizer will split words, delete stop words and punctuation and
 #transform it into uni/bi/trigrams, which will all be filtered by the regex.
@@ -50,8 +26,10 @@ punct = punct.translate(None,"'")
 punctexcludeset = set(punct)
 stop = set(stopwords.words('english'))
 docindex = 0
+
 def test_set(s):
     return ''.join(ch for ch in s if ch not in punctexcludeset)
+
 def my_tokenizer(documentasstring):
     #these variables have to be declared here as global so the vectorizer can
     #see them from our program (we first declared them earlier)
@@ -59,13 +37,12 @@ def my_tokenizer(documentasstring):
     global totalwordsincorpus
     global numberofdocuments
     docsentences = nltk.sent_tokenize(documentasstring)
-    docwords = list()
+    docterms = list()
     doclength = 0
     print docindex
-    alltermsset = set()
-    sentenceslists = []
+    #alltermsset = set()
+    #sentenceslists = []
     for etdsentence in docsentences:
-        sentenceset = set()
         
         sentencenopunct = test_set(etdsentence.lower())
         sentencewords = nltk.word_tokenize(sentencenopunct)
@@ -81,7 +58,7 @@ def my_tokenizer(documentasstring):
             sentencewords2 += [word]
         sentenceclean = [i for i in sentencewords2 if i not in stop]
         
-        sentenceset = set(sentenceclean)
+        #sentenceterms = sentenceclean
         
         docbigrams = list()
         doctrigrams = list()
@@ -92,15 +69,16 @@ def my_tokenizer(documentasstring):
                 if iword < len(sentenceclean)-2:
                     trigram = sentenceclean[iword] + " " + sentenceclean[iword+1] + " " + sentenceclean[iword+2]
                     doctrigrams += [trigram]
-        sentenceset = sentenceset.union(set(docbigrams).union(set(doctrigrams)))
-        sentenceslists += [list(sentenceset)]
-        alltermsset = alltermsset.union(sentenceset)    
-    totalwordsperdocument[docindex] = len(alltermsset)
-    totalwordsincorpus += len(alltermsset)
+        sentenceterms = sentenceclean + docbigrams + doctrigrams
+        docterms += sentenceterms
+        #sentenceslists += [sentenceterms]
+        #alltermsset = alltermsset.union(set(sentenceterms))    
+    #totalwordsperdocument[docindex] = len(alltermsset)
+    #totalwordsincorpus += len(alltermsset)
     docindex +=1
     numberofdocuments +=1
     print "done " + str(docindex)
-    return list(alltermsset)
+    return docterms
 
 #PROCESSING:
 
@@ -122,59 +100,22 @@ for filename in os.listdir(path):
     docreadindex += 1
 
 
-
-#uses a vectorizer to calculate term frequency
-countVectorizer = CountVectorizer(tokenizer=my_tokenizer)
-countVectorizer.build_analyzer()
-#docstf = countVectorizer.fit_transform(set(["Alice stopped by the big big station to retrieve the blue poop","Alice stopped by a poop and was angry"]))
-docstf = countVectorizer.fit_transform(all_docs)
-vecvocab = countVectorizer.vocabulary_
+vectorizer2 = TfidfVectorizer( use_idf=True, tokenizer=my_tokenizer)
+docstfidf = vectorizer2.fit_transform(all_docs)
+vecvocab = vectorizer2.vocabulary_
 
 
-
-#calculates the IDF according to the new formula
-idfDict = dict()
-for termi in range(len(vecvocab)):
-    docswithterm = docstf.getcol(termi).getnnz(0)[0]
-    numerator = numberofdocuments - docswithterm +0.5
-    denominator = docswithterm +0.5
-    idfDict[termi] = log10(numerator/denominator)
-
-
-#calculates the BM25 for a term,document
-k1 = 1.2
-b = 0.75
-def score(documentn, termi):
-    idfpart = idfDict[termi]
-    ftD = docstf[documentn,termi]
-    avgdl = totalwordsincorpus/(0.0+numberofdocuments)
-    #print ftD
-    numeratorpart = ftD * (k1 + 1)
-    denominatorpart = ftD + k1 * (1 - b + b * (totalwordsperdocument[documentn]/avgdl) )
-    scoredt = idfpart * (numeratorpart / denominatorpart)
-    return scoredt
-
-
-#all the scores will be calculated here
-dictscores = dict()
-for doci in range(numberofdocuments):
-    documentscores = dict()
-    for termi in range(len(vecvocab)):
-        documentscores[termi] = score(doci, termi)
-    dictscores[doci] = documentscores
-
-
+#calculate tf-idf for each document
 doccandidateslist = dict()
-featurenames = list(countVectorizer.get_feature_names())
-featurenamescopy = numpy.array(featurenames)
-for idoc in range(numberofdocuments):
-    bm25doccopy = numpy.array(dictscores[idoc].values())
-    #the keys were inserted by order, so the values were by this order as well
-    sortedindices = (bm25doccopy.argsort()[-5:])[::-1]
+featurenames = list(vectorizer2.get_feature_names())
+for idoc in range(len(docindexnames)):
+    docname = docindexnames[idoc]
+    featurenamescopy = numpy.array(featurenames)
+    tfidfdoccopy = numpy.array(docstfidf.getrow(idoc).toarray()[0])
+    sortedindices = (tfidfdoccopy.argsort()[-5:])[::-1]
     candidatewordsfordoc = list()
     for candidatei in sortedindices:
         candidatewordsfordoc += [featurenamescopy[candidatei]]
-    doccandidateslist[idoc] = candidatewordsfordoc
-
+    doccandidateslist[docname] = candidatewordsfordoc
     
 print doccandidateslist

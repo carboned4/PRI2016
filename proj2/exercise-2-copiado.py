@@ -30,6 +30,11 @@ def sort(array):
     else: 
         return array
 
+punct = string.punctuation
+punct = punct.translate(None,"'")
+punctexcludeset = set(punct)
+stop = set(stopwords.words('english'))
+
 #import 30 documents
 import os
 path = "fao30/documents/"
@@ -46,10 +51,9 @@ for filename in os.listdir(path):
     all_docs += [etdread]
     docindex += 1
 
-stop = set(stopwords.words('english'))
 
 #build tk-idf array with unigrams and bigrams and exclude stop_words 
-vectorizer2 = TfidfVectorizer( use_idf=True, ngram_range=(1,2), stop_words=stop )
+vectorizer2 = TfidfVectorizer( use_idf=True, )
 docstfidf = vectorizer2.fit_transform(all_docs)
 vecvocab = vectorizer2.vocabulary_
 
