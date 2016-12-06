@@ -26,6 +26,9 @@ punct = punct.translate(None,"'")
 punctexcludeset = set(punct)
 stop = set(stopwords.words('english'))
 docindex = 0
+sentenceslistsfordocs = list()
+#sentenceslists += [[]]
+alltermssetfordoc = list()
 
 def test_set(s):
     return ''.join(ch for ch in s if ch not in punctexcludeset)
@@ -36,12 +39,15 @@ def my_tokenizer(documentasstring):
     global docindex
     global totalwordsincorpus
     global numberofdocuments
-    docsentences = nltk.sent_tokenize(documentasstring)
+    global alltermssetfordoc
+    global sentenceslistsfordocs
     docterms = list()
     doclength = 0
+    alltermssetforthisdoc = set()
+    sentenceslistforthis = list()
+    
+    docsentences = nltk.sent_tokenize(documentasstring)
     print docindex
-    #alltermsset = set()
-    #sentenceslists = []
     for etdsentence in docsentences:
         
         sentencenopunct = test_set(etdsentence.lower())
@@ -70,14 +76,17 @@ def my_tokenizer(documentasstring):
                     trigram = sentenceclean[iword] + " " + sentenceclean[iword+1] + " " + sentenceclean[iword+2]
                     doctrigrams += [trigram]
         sentenceterms = sentenceclean + docbigrams + doctrigrams
+        sentencetermsset = set(sentenceterms)
         docterms += sentenceterms
-        #sentenceslists += [sentenceterms]
-        #alltermsset = alltermsset.union(set(sentenceterms))    
-    #totalwordsperdocument[docindex] = len(alltermsset)
-    #totalwordsincorpus += len(alltermsset)
+        sentenceslistforthis += [sentencetermsset]
+        alltermssetforthisdoc = alltermssetforthisdoc.union(sentencetermsset)    
+    #totalwordsperdocument[docindex] = len(alltermssetfordoc)
+    #totalwordsincorpus += len(alltermssetfordoc)
+    sentenceslistsfordocs += [sentenceslistforthis]
+    alltermssetfordoc += [alltermssetforthisdoc]
+    print "done " + str(docindex)
     docindex +=1
     numberofdocuments +=1
-    print "done " + str(docindex)
     return docterms
 
 #PROCESSING:
