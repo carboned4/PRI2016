@@ -107,7 +107,8 @@ for filename in os.listdir(path):
     etd_words = nltk.word_tokenize(etdread)
     all_docs += [etdread]
     docreadindex += 1
-    if docreadindex == 3:
+    #only read the first 2 documents (still very slow)
+    if docreadindex == 1:
         break
 
 
@@ -160,9 +161,13 @@ for idoc in range(len(docindexnames)):
     
     graphmatrix = list()
     termindexes = dict()
+    sumlinkweights = dict()
+    
     for iterm in range(len(alltermslist)):
         termindexes[alltermslist[iterm]] = iterm;
         graphmatrix += [dict()]
+        #we set the PR[term] at iteration 0 to the tfidf
+        przero = docstfidf[idoc,vectorizer2.vocabulary_[alltermslist[iterm]]]
         pagerankiterations[0] += [przero]
     sortediterations[0] = sortIteration(0)    
 
@@ -177,7 +182,22 @@ for idoc in range(len(docindexnames)):
                     graphmatrix[term2][term1] += 1
                 except Exception:
                     graphmatrix[term1][term2] = 1
-                    graphmatrix[term2][term1] = 1                    
+                    graphmatrix[term2][term1] = 1
+                try:
+                    sumlinkweights[term1] +=1
+                    sumlinkweights[term2] +=1
+                except Exception:
+                    sumlinkweights[term1] =1
+                    sumlinkweights[term2] =1
+    
+    sumlinkpriors = dict()
+    i = 0
+    for iterm in graphmatrix:
+        totalprior = 0
+        for ilink in iterm.keys():
+            totalprior+= docstfidf[idoc,vectorizer2.vocabulary_[alltermslist[ilink]]]
+        sumlinkpriors[i] = totalprior
+        i+=1
     
     for iterationi in range(1,51):
         pagerankiterations += [list()]
