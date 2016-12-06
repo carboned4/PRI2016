@@ -113,7 +113,7 @@ for filename in os.listdir(path):
 
 
 print "calcular tfidf"
-vectorizer2 = TfidfVectorizer( use_idf=True, tokenizer=my_tokenizer)
+vectorizer2 = TfidfVectorizer( use_idf=True, tokenizer=my_tokenizer, smooth_idf=True)
 docstfidf = vectorizer2.fit_transform(all_docs)
 vecvocab = vectorizer2.vocabulary_
 print "calculado tfidf"
@@ -129,10 +129,22 @@ def sortIteration(it):
 
 damper = 0.15
 def pageranki(pi):
-    sum = 0
+    sumpjs = 0
+    #prior(pi) = tfidf(pi) (feito acima)
+    # sum weight(.,.) calculado abaixo, em sumlinkweights, para cada pj.
+    # sum prior(.) calculado abaixo, em sumlinkpriors, para cada pi.
+    # damper x tfidf(pi)/sumlinkpriors(pi) + (1-d) *
+    # * sum[ pr(pj*weight(pj,pi)/sumlinkweights(pj) ]
+    tfidfpi = docstfidf[idoc,vectorizer2.vocabulary_[alltermslist[ilink]]]
+    sumlinkpriorspi = sumlinkpriors[pi]
+    if sumlinkpriorspi == 0:
+        return 0
     for pjlinkofpi in graphmatrix[pi].keys():
-        sum += pagerankiterations[lastPRiteration][pjlinkofpi]/(len(graphmatrix[pjlinkofpi]))
-    return damper/bigN+(1-damper)*sum
+        parcel = pagerankiterations[lastPRiteration][pjlinkofpi]
+        parcel *= sumlinkweights[pi]
+        parcel = parcel/sumlinkweights[pjlinkofpi]
+        sumpjs += parcel
+    return damper * tfidfpi / sumlinkpriorspi +(1-damper)*sumpjs
 
 def checkOrderIsDifferent(ii):
     sortdifferent = False
@@ -156,7 +168,7 @@ for idoc in range(len(docindexnames)):
     sortediterations = list()
     sortediterations += [[]]
     bigN = len(alltermslist)
-    przero = 1.0/bigN
+    
     lastPRiteration = 0
     
     graphmatrix = list()
@@ -198,7 +210,7 @@ for idoc in range(len(docindexnames)):
             totalprior+= docstfidf[idoc,vectorizer2.vocabulary_[alltermslist[ilink]]]
         sumlinkpriors[i] = totalprior
         i+=1
-    
+    #print sumlinkpriors
     for iterationi in range(1,51):
         pagerankiterations += [list()]
         for pi in range(len(alltermslist)):
