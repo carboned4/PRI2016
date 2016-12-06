@@ -172,8 +172,12 @@ for idoc in range(len(docindexnames)):
                 term1 = termindexes[isentence[iterm]]
                 term2 = termindexes[isentence[iterm2]]
                 #print str(len(isentence)) + " " +str(term1) + " " + str(term2)
-                graphmatrix[term1][term2] = 1
-                graphmatrix[term2][term1] = 1
+                try:
+                    graphmatrix[term1][term2] += 1
+                    graphmatrix[term2][term1] += 1
+                except Exception:
+                    graphmatrix[term1][term2] = 1
+                    graphmatrix[term2][term1] = 1                    
     
     for iterationi in range(1,51):
         pagerankiterations += [list()]
