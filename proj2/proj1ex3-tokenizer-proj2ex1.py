@@ -78,7 +78,7 @@ def my_tokenizer(documentasstring):
         sentenceterms = sentenceclean + docbigrams + doctrigrams
         sentencetermsset = set(sentenceterms)
         docterms += sentenceterms
-        sentenceslistforthis += [sentencetermsset]
+        sentenceslistforthis += [sentenceterms]
         alltermssetforthisdoc = alltermssetforthisdoc.union(sentencetermsset)    
     #totalwordsperdocument[docindex] = len(alltermssetfordoc)
     #totalwordsincorpus += len(alltermssetfordoc)
@@ -107,13 +107,92 @@ for filename in os.listdir(path):
     etd_words = nltk.word_tokenize(etdread)
     all_docs += [etdread]
     docreadindex += 1
+    if docreadindex == 3:
+        break
 
 
+print "calcular tfidf"
 vectorizer2 = TfidfVectorizer( use_idf=True, tokenizer=my_tokenizer)
 docstfidf = vectorizer2.fit_transform(all_docs)
 vecvocab = vectorizer2.vocabulary_
+print "calculado tfidf"
+
+#---------------------
+#funcoes para pagerank
 
 
+def sortIteration(it):
+    iterationcopy = numpy.array(pagerankiterations[it])
+    sortedindices = (iterationcopy.argsort())[::-1]
+    return sortedindices
+
+damper = 0.15
+def pageranki(pi):
+    sum = 0
+    for pjlinkofpi in graphmatrix[pi].keys():
+        sum += pagerankiterations[lastPRiteration][pjlinkofpi]/(len(graphmatrix[pjlinkofpi]))
+    return damper/bigN+(1-damper)*sum
+
+def checkOrderIsDifferent(ii):
+    sortdifferent = False
+    for iterm in range(len(sortediterations[ii])):
+        if sortediterations[ii][iterm] != sortediterations[ii-1][iterm]:
+            sortdifferent = True
+            break
+    return sortdifferent
+
+
+top5rankedfordocs = list()
+
+print "calcular pagerank"
+#calculo de pagerank
+alltermslistfordocs = list()
+for idoc in range(len(docindexnames)):
+    print "pr "+str(idoc)
+    alltermslist = list(alltermssetfordoc[idoc])
+    pagerankiterations = list()
+    pagerankiterations += [[]]
+    sortediterations = list()
+    sortediterations += [[]]
+    bigN = len(alltermslist)
+    przero = 1.0/bigN
+    lastPRiteration = 0
+    
+    graphmatrix = list()
+    termindexes = dict()
+    for iterm in range(len(alltermslist)):
+        termindexes[alltermslist[iterm]] = iterm;
+        graphmatrix += [dict()]
+        pagerankiterations[0] += [przero]
+    sortediterations[0] = sortIteration(0)    
+
+    for isentence in sentenceslistsfordocs[idoc]:
+        for iterm in range(len(isentence)-1):
+            for iterm2 in range(iterm+1,len(isentence)):
+                term1 = termindexes[isentence[iterm]]
+                term2 = termindexes[isentence[iterm2]]
+                #print str(len(isentence)) + " " +str(term1) + " " + str(term2)
+                graphmatrix[term1][term2] = 1
+                graphmatrix[term2][term1] = 1
+    
+    for iterationi in range(1,51):
+        pagerankiterations += [list()]
+        for pi in range(len(alltermslist)):
+            pagerankiterations[iterationi] += [pageranki(pi)]
+        sortediterations += [sortIteration(iterationi)]
+        orderisdifferent = checkOrderIsDifferent(iterationi)
+        lastPRiteration = iterationi
+        if orderisdifferent != True:
+            break
+    #done para este doc?
+    top5indices = sortediterations[lastPRiteration][:5]
+    top5ranked = list()
+    for itop in top5indices:
+        top5ranked += [(alltermslist[itop],pagerankiterations[lastPRiteration][itop])]
+    
+    top5rankedfordocs += [top5ranked]
+    
+"""
 #calculate tf-idf for each document
 doccandidateslist = dict()
 featurenames = list(vectorizer2.get_feature_names())
@@ -126,5 +205,8 @@ for idoc in range(len(docindexnames)):
     for candidatei in sortedindices:
         candidatewordsfordoc += [featurenamescopy[candidatei]]
     doccandidateslist[docname] = candidatewordsfordoc
-    
-print doccandidateslist
+"""
+
+
+#print doccandidateslist
+print top5rankedfordocs
