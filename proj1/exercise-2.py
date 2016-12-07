@@ -45,6 +45,8 @@ for filename in os.listdir(path):
     etd_words = nltk.word_tokenize(etdread)
     all_docs += [etdread]
     docindex += 1
+    if docindex == 5:
+            break    
 
 stop = set(stopwords.words('english'))
 

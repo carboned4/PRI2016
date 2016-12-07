@@ -108,12 +108,12 @@ for filename in os.listdir(path):
     all_docs += [etdread]
     docreadindex += 1
     #only read the first 2 documents (still very slow)
-    if docreadindex == 3:
+    if docreadindex == 5:
         break
 
 
 print "calcular tfidf"
-vectorizer2 = TfidfVectorizer( use_idf=True, tokenizer=my_tokenizer)
+vectorizer2 = TfidfVectorizer( use_idf=True, tokenizer=my_tokenizer, smooth_idf=True)
 docstfidf = vectorizer2.fit_transform(all_docs)
 vecvocab = vectorizer2.vocabulary_
 print "calculado tfidf"
@@ -168,7 +168,7 @@ for idoc in range(len(docindexnames)):
     sortediterations = list()
     sortediterations += [[]]
     bigN = len(alltermslist)
-    
+    przero = 1/bigN
     lastPRiteration = 0
     
     graphmatrix = list()
@@ -178,8 +178,7 @@ for idoc in range(len(docindexnames)):
     for iterm in range(len(alltermslist)):
         termindexes[alltermslist[iterm]] = iterm;
         graphmatrix += [dict()]
-        #we set the PR[term] at iteration 0 to the tfidf
-        przero = docstfidf[idoc,vectorizer2.vocabulary_[alltermslist[iterm]]]
+        
         pagerankiterations[0] += [przero]
     sortediterations[0] = sortIteration(0)    
 
@@ -235,7 +234,6 @@ for idoc in range(len(docindexnames)):
 #print top5rankedfordocs
 
 #ficheiros das equipas
-#get all relevants and merge the relevants for the same documents
 path = "fao30/indexers/iic1/"
 keysfordoc = dict()
 indexerIterator = 1
