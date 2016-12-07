@@ -108,7 +108,7 @@ for filename in os.listdir(path):
     all_docs += [etdread]
     docreadindex += 1
     #only read the first 2 documents (still very slow)
-    if docreadindex == 1:
+    if docreadindex == 3:
         break
 
 
