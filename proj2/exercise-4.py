@@ -150,8 +150,9 @@ with tag('html'):
             fontsize = int(20.0 + 30.0 / math.sqrt(icandidate+1))
             fontcolor = " hsl(220, "+str(int(100.0 - 100.0 * (icandidate/100.0)))+"%, 40%)"
             print fontcolor
-            with tag('p', style = 'font-size:'+str(fontsize)+'px; color: ' + fontcolor + ";"):
-                text(topranked[icandidate])
+            with tag('p'):
+                with tag('span', style = 'font-size:'+str(fontsize)+'px; color: ' + fontcolor + ";", title= str(icandidate+1)):
+                    text(topranked[icandidate])
 
 result = doc.getvalue()
 os.remove("alice.html")
