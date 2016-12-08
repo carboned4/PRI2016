@@ -6,6 +6,8 @@ import numpy
 import lxml.etree as etree
 from yattag import Doc
 import math
+import os
+
 
 
 etdsentences = list()
@@ -146,10 +148,13 @@ with tag('html'):
             text('RSS: Technology')
         for icandidate in range(len(topranked)):
             fontsize = int(20.0 + 30.0 / math.sqrt(icandidate+1))
-            with tag('p', style = 'font-size:'+str(fontsize)+'px'):
+            fontcolor = " hsl(220, "+str(int(100.0 - 100.0 * (icandidate/100.0)))+"%, 40%)"
+            print fontcolor
+            with tag('p', style = 'font-size:'+str(fontsize)+'px; color: ' + fontcolor + ";"):
                 text(topranked[icandidate])
 
 result = doc.getvalue()
-f = open('alice.html', 'r+')
+os.remove("alice.html")
+f = open('alice.html', 'w+')
 f.write(result.encode('ascii', 'xmlcharrefreplace'))
 f.close()
