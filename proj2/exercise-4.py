@@ -143,9 +143,12 @@ with tag('html'):
         with tag('style'):
             text('p { margin: 0px; text-align: center; font-family: Helvetica;}')
             text('h1 { margin: 5px; text-align: center; font-size: 60px; font-family: Helvetica;}')
+            text('h2 { margin: 5px; text-align: center; font-size: 40px; font-family: Helvetica;}')
     with tag('body'):
         with tag('h1'):
             text('RSS: Technology')
+        with tag('h2'):
+            text('Group 4')
         for icandidate in range(len(topranked)):
             fontsize = int(20.0 + 30.0 / math.sqrt(icandidate+1))
             fontcolor = " hsl(220, "+str(int(100.0 - 100.0 * (icandidate/100.0)))+"%, 40%)"
@@ -155,7 +158,7 @@ with tag('html'):
                     text(topranked[icandidate])
 
 result = doc.getvalue()
-os.remove("alice.html")
-f = open('alice.html', 'w+')
+os.remove("tech.html")
+f = open('tech.html', 'w')
 f.write(result.encode('ascii', 'xmlcharrefreplace'))
 f.close()
