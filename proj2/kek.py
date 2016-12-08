@@ -24,7 +24,7 @@ for elem in root.findall('.//item//*'):
 """
 
 
-
+itemsassentences = list()
 import lxml.etree as etree
 #doc = etree.parse('AirFlightsData.xml')
 doc = etree.parse('http://rss.nytimes.com/services/xml/rss/nyt/Technology.xml')
@@ -33,8 +33,9 @@ for item in doc.xpath('/rss/channel/item'):
     restitle = item.find('title').text
     resdescription = item.find('description').text
     #print etree.tostring(item)
-    print "title " + restitle.encode('cp850', errors='replace')
-    print "desc " + resdescription.encode('cp850', errors='replace')
+    print restitle.encode('cp850', errors='replace')
+    print resdescription.encode('cp850', errors='replace')
+    print "\n"
     #print "title " + restitle.text.encode('cp850', errors='replace')
     #for resdescription in res.xpath('//description'):
         #print resdescription.text.encode('cp850', errors='replace')
