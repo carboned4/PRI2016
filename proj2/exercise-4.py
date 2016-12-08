@@ -125,8 +125,9 @@ for iterationi in range(1,51):
 
 
 
-top5indices = sortediterations[lastPRiteration][:5]
-top5ranked = list()
-for itop in top5indices:
-    top5ranked += [(alltermslist[itop],pagerankiterations[lastPRiteration][itop])]
+topindices = sortediterations[lastPRiteration][:5]
+topranked = list()
+for itop in topindices:
+    topranked += [(alltermslist[itop],pagerankiterations[lastPRiteration][itop])]
 
+print topranked
