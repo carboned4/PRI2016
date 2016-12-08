@@ -1,6 +1,5 @@
 import nltk
 import string
-from nltk.tokenize import RegexpTokenizer
 from nltk.corpus import stopwords
 from nltk.collocations import *
 import numpy
