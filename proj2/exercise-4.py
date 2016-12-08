@@ -158,7 +158,10 @@ with tag('html'):
                     text(topranked[icandidate])
 
 result = doc.getvalue()
-os.remove("tech.html")
-f = open('tech.html', 'w')
+try:
+    os.remove("tech.html")
+except:
+    pass
+f = open('tech.html', 'w+')
 f.write(result.encode('ascii', 'xmlcharrefreplace'))
 f.close()
