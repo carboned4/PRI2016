@@ -4,6 +4,9 @@ from nltk.corpus import stopwords
 from nltk.collocations import *
 import numpy
 import lxml.etree as etree
+from yattag import Doc
+import math
+
 
 etdsentences = list()
 doc = etree.parse('http://rss.nytimes.com/services/xml/rss/nyt/Technology.xml')
@@ -125,9 +128,28 @@ for iterationi in range(1,51):
 
 
 
-topindices = sortediterations[lastPRiteration][:5]
+topindices = sortediterations[lastPRiteration][:100]
 topranked = list()
 for itop in topindices:
-    topranked += [(alltermslist[itop],pagerankiterations[lastPRiteration][itop])]
+    topranked += [alltermslist[itop]]
 
-print topranked
+#http://stackoverflow.com/questions/6748559/generating-html-documents-in-python
+#http://www.yattag.org/
+doc, tag, text = Doc().tagtext()
+with tag('html'):
+    with tag('header'):
+        with tag('style'):
+            text('p { margin: 0px; text-align: center; font-family: Helvetica;}')
+            text('h1 { margin: 5px; text-align: center; font-size: 60px; font-family: Helvetica;}')
+    with tag('body'):
+        with tag('h1'):
+            text('RSS: Technology')
+        for icandidate in range(len(topranked)):
+            fontsize = int(20.0 + 30.0 / math.sqrt(icandidate+1))
+            with tag('p', style = 'font-size:'+str(fontsize)+'px'):
+                text(topranked[icandidate])
+
+result = doc.getvalue()
+f = open('alice.html', 'r+')
+f.write(result.encode('ascii', 'xmlcharrefreplace'))
+f.close()
