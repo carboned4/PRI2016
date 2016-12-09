@@ -11,16 +11,7 @@ from math import log10
 import numpy
 
 
-#general statistics that we'll calculate further down
-numberofdocuments = 0
-totalwordsperdocument = dict()
-totalwordsincorpus = 0
 
-
-#CUSTOM TOKENIZER
-#this tokenizer will split words, delete stop words and punctuation and
-#transform it into uni/bi/trigrams, which will all be filtered by the regex.
-#some document and general statistics are also calculated here.
 punct = string.punctuation
 punct = punct.translate(None,"'")
 punctexcludeset = set(punct)
@@ -33,12 +24,13 @@ alltermssetfordoc = list()
 def test_set(s):
     return ''.join(ch for ch in s if ch not in punctexcludeset)
 
+#CUSTOM TOKENIZER
+#tokenizer feito por nos que separa as frases e os seus termos da mesma forma
+#que e feito no exercicio 1, para garantir que o vectorizer e a matriz de ligacoes
+#recebem os mesmos termos
 def my_tokenizer(documentasstring):
-    #these variables have to be declared here as global so the vectorizer can
-    #see them from our program (we first declared them earlier)
+    #variaveis declaradas para o tokenizer as ver quando for chamado pelo vectorizer
     global docindex
-    global totalwordsincorpus
-    global numberofdocuments
     global alltermssetfordoc
     global sentenceslistsfordocs
     docterms = list()
@@ -80,18 +72,15 @@ def my_tokenizer(documentasstring):
         docterms += sentenceterms
         sentenceslistforthis += [sentenceterms]
         alltermssetforthisdoc = alltermssetforthisdoc.union(sentencetermsset)    
-    #totalwordsperdocument[docindex] = len(alltermssetfordoc)
-    #totalwordsincorpus += len(alltermssetfordoc)
     sentenceslistsfordocs += [sentenceslistforthis]
     alltermssetfordoc += [alltermssetforthisdoc]
     print "done " + str(docindex)
     docindex +=1
-    numberofdocuments +=1
     return docterms
 
 #PROCESSING:
 
-#documents from FAO30 (same as exercise-2)
+#documents from FAO30 (como no 1)
 
 import os
 path = "fao30/documents/"
@@ -107,7 +96,7 @@ for filename in os.listdir(path):
     etd_words = nltk.word_tokenize(etdread)
     all_docs += [etdread]
     docreadindex += 1
-    #only read the first 2 documents (still very slow)
+    #only read the first 5 documents (lento)
     if docreadindex == 5:
         break
 
@@ -194,13 +183,15 @@ for idoc in range(len(docindexnames)):
                 except Exception:
                     graphmatrix[term1][term2] = 1
                     graphmatrix[term2][term1] = 1
+                #optimizacao calculando a soma dos pesos de cada ligacao ao termo
+                #previamente
                 try:
                     sumlinkweights[term1] +=1
                     sumlinkweights[term2] +=1
                 except Exception:
                     sumlinkweights[term1] =1
                     sumlinkweights[term2] =1
-    
+    #optimizacao calculando a soma de priors de cada termo previamente
     sumlinkpriors = dict()
     i = 0
     for iterm in graphmatrix:
@@ -229,9 +220,7 @@ for idoc in range(len(docindexnames)):
     docname = docindexnames[idoc]
     doccandidateslist[docname] = top5ranked
 
-
-#print doccandidateslist
-#print top5rankedfordocs
+#os candidatos ja foram obtidos
 
 #ficheiros das equipas
 path = "fao30/indexers/iic1/"
@@ -259,7 +248,7 @@ for filename in os.listdir(path):
 
 
 docAPs = dict()
-#calculate AP and therefore MAP
+#calcular APs e a sua soma
 aptotalsum = 0
 for idoc in range(len(docindexnames)):
     docname = docindexnames[idoc]
@@ -289,5 +278,5 @@ for idoc in range(len(docindexnames)):
     listanswer = []
     setansweri = set()
 
-        
+#imprime MAP
 print "map: " + str(aptotalsum/len(docindexnames))

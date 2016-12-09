@@ -13,8 +13,7 @@ def test_set(s):
     return ''.join(ch for ch in s if ch not in exclude)
 
 
-#exercise 1 - part 1 - reading words
-#english textual document
+#separacao em frases
 etd = open('englishtextualdoc.txt')
 etdread = etd.read()
 etdread = etdread.decode('utf-8')
@@ -24,7 +23,7 @@ sentenceslists = []
 alltermsset = set()
 for etdsentence in etdsentences:
     sentenceset = set()
-    
+    #limpeza de palavras
     sentencenopunct = test_set(etdsentence.lower())
     sentencewords = nltk.word_tokenize(sentencenopunct)
     sentencewords2 = list()
@@ -40,7 +39,7 @@ for etdsentence in etdsentences:
     sentenceclean = [i for i in sentencewords2 if i not in stop]
     
     sentenceset = set(sentenceclean)
-    
+    #criacao de bigramas e trigramas
     docbigrams = list()
     doctrigrams = list()
     for iword in range(len(sentenceclean)):
@@ -50,11 +49,13 @@ for etdsentence in etdsentences:
             if iword < len(sentenceclean)-2:
                 trigram = sentenceclean[iword] + " " + sentenceclean[iword+1] + " " + sentenceclean[iword+2]
                 doctrigrams += [trigram]
+    #set com todos os termos de uma frase, depois colocados numa lista de frases
     sentenceset = sentenceset.union(set(docbigrams).union(set(doctrigrams)))
     sentenceslists += [list(sentenceset)]
     alltermsset = alltermsset.union(sentenceset)
 
 alltermslist = list(alltermsset)
+#iteracoes de PR armazenadas numa lista
 pagerankiterations = list()
 pagerankiterations += [[]]
 sortediterations = list()
@@ -69,7 +70,7 @@ def sortIteration(it):
     sortedindices = (iterationcopy.argsort())[::-1]
     return sortedindices
 
-
+#criacao do indice de termos e da iteracao 0 do PR
 graphmatrix = list()
 termindexes = dict()
 for iterm in range(len(alltermslist)):
@@ -79,13 +80,12 @@ for iterm in range(len(alltermslist)):
 sortediterations[0] = sortIteration(0)
 
 
-
+#preenchimento da matriz esparsa com ligacoes entre termos
 for isentence in sentenceslists:
     for iterm in range(len(isentence)-1):
         for iterm2 in range(iterm+1,len(isentence)):
             term1 = termindexes[isentence[iterm]]
             term2 = termindexes[isentence[iterm2]]
-            #print str(len(isentence)) + " " +str(term1) + " " + str(term2)
             graphmatrix[term1][term2] = 1
             graphmatrix[term2][term1] = 1
 
@@ -107,7 +107,7 @@ def checkOrderIsDifferent(ii):
     return sortdifferent
             
 
-
+#iteracoes de pagerank 1 a 50
 for iterationi in range(1,51):
     pagerankiterations += [list()]
     for pi in range(len(alltermslist)):
